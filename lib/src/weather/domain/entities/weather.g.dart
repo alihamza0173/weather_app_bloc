@@ -7,6 +7,7 @@ part of 'weather.dart';
 // **************************************************************************
 
 Serializer<Weather> _$weatherSerializer = new _$WeatherSerializer();
+Serializer<WeatherList> _$weatherListSerializer = new _$WeatherListSerializer();
 Serializer<Main> _$mainSerializer = new _$MainSerializer();
 Serializer<WeatherDescription> _$weatherDescriptionSerializer =
     new _$WeatherDescriptionSerializer();
@@ -22,6 +23,49 @@ class _$WeatherSerializer implements StructuredSerializer<Weather> {
 
   @override
   Iterable<Object?> serialize(Serializers serializers, Weather object,
+      {FullType specifiedType = FullType.unspecified}) {
+    final result = <Object?>[
+      'list',
+      serializers.serialize(object.weather,
+          specifiedType:
+              const FullType(BuiltList, const [const FullType(WeatherList)])),
+    ];
+
+    return result;
+  }
+
+  @override
+  Weather deserialize(Serializers serializers, Iterable<Object?> serialized,
+      {FullType specifiedType = FullType.unspecified}) {
+    final result = new WeatherBuilder();
+
+    final iterator = serialized.iterator;
+    while (iterator.moveNext()) {
+      final key = iterator.current! as String;
+      iterator.moveNext();
+      final Object? value = iterator.current;
+      switch (key) {
+        case 'list':
+          result.weather.replace(serializers.deserialize(value,
+                  specifiedType: const FullType(
+                      BuiltList, const [const FullType(WeatherList)]))!
+              as BuiltList<Object?>);
+          break;
+      }
+    }
+
+    return result.build();
+  }
+}
+
+class _$WeatherListSerializer implements StructuredSerializer<WeatherList> {
+  @override
+  final Iterable<Type> types = const [WeatherList, _$WeatherList];
+  @override
+  final String wireName = 'WeatherList';
+
+  @override
+  Iterable<Object?> serialize(Serializers serializers, WeatherList object,
       {FullType specifiedType = FullType.unspecified}) {
     final result = <Object?>[
       'main',
@@ -58,13 +102,20 @@ class _$WeatherSerializer implements StructuredSerializer<Weather> {
         ..add(serializers.serialize(value,
             specifiedType: const FullType(String)));
     }
+    value = object.pop;
+    if (value != null) {
+      result
+        ..add('pop')
+        ..add(serializers.serialize(value,
+            specifiedType: const FullType(double)));
+    }
     return result;
   }
 
   @override
-  Weather deserialize(Serializers serializers, Iterable<Object?> serialized,
+  WeatherList deserialize(Serializers serializers, Iterable<Object?> serialized,
       {FullType specifiedType = FullType.unspecified}) {
-    final result = new WeatherBuilder();
+    final result = new WeatherListBuilder();
 
     final iterator = serialized.iterator;
     while (iterator.moveNext()) {
@@ -105,6 +156,10 @@ class _$WeatherSerializer implements StructuredSerializer<Weather> {
         case 'dt_txt':
           result.dtTxt = serializers.deserialize(value,
               specifiedType: const FullType(String)) as String?;
+          break;
+        case 'pop':
+          result.pop = serializers.deserialize(value,
+              specifiedType: const FullType(double)) as double?;
           break;
       }
     }
@@ -458,6 +513,98 @@ class _$SysSerializer implements StructuredSerializer<Sys> {
 
 class _$Weather extends Weather {
   @override
+  final BuiltList<WeatherList> weather;
+
+  factory _$Weather([void Function(WeatherBuilder)? updates]) =>
+      (new WeatherBuilder()..update(updates))._build();
+
+  _$Weather._({required this.weather}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(weather, r'Weather', 'weather');
+  }
+
+  @override
+  Weather rebuild(void Function(WeatherBuilder) updates) =>
+      (toBuilder()..update(updates)).build();
+
+  @override
+  WeatherBuilder toBuilder() => new WeatherBuilder()..replace(this);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(other, this)) return true;
+    return other is Weather && weather == other.weather;
+  }
+
+  @override
+  int get hashCode {
+    var _$hash = 0;
+    _$hash = $jc(_$hash, weather.hashCode);
+    _$hash = $jf(_$hash);
+    return _$hash;
+  }
+
+  @override
+  String toString() {
+    return (newBuiltValueToStringHelper(r'Weather')..add('weather', weather))
+        .toString();
+  }
+}
+
+class WeatherBuilder implements Builder<Weather, WeatherBuilder> {
+  _$Weather? _$v;
+
+  ListBuilder<WeatherList>? _weather;
+  ListBuilder<WeatherList> get weather =>
+      _$this._weather ??= new ListBuilder<WeatherList>();
+  set weather(ListBuilder<WeatherList>? weather) => _$this._weather = weather;
+
+  WeatherBuilder();
+
+  WeatherBuilder get _$this {
+    final $v = _$v;
+    if ($v != null) {
+      _weather = $v.weather.toBuilder();
+      _$v = null;
+    }
+    return this;
+  }
+
+  @override
+  void replace(Weather other) {
+    ArgumentError.checkNotNull(other, 'other');
+    _$v = other as _$Weather;
+  }
+
+  @override
+  void update(void Function(WeatherBuilder)? updates) {
+    if (updates != null) updates(this);
+  }
+
+  @override
+  Weather build() => _build();
+
+  _$Weather _build() {
+    _$Weather _$result;
+    try {
+      _$result = _$v ?? new _$Weather._(weather: weather.build());
+    } catch (_) {
+      late String _$failedField;
+      try {
+        _$failedField = 'weather';
+        weather.build();
+      } catch (e) {
+        throw new BuiltValueNestedFieldError(
+            r'Weather', _$failedField, e.toString());
+      }
+      rethrow;
+    }
+    replace(_$result);
+    return _$result;
+  }
+}
+
+class _$WeatherList extends WeatherList {
+  @override
   final int? dt;
   @override
   final Main main;
@@ -473,11 +620,13 @@ class _$Weather extends Weather {
   final Sys sys;
   @override
   final String? dtTxt;
+  @override
+  final double? pop;
 
-  factory _$Weather([void Function(WeatherBuilder)? updates]) =>
-      (new WeatherBuilder()..update(updates))._build();
+  factory _$WeatherList([void Function(WeatherListBuilder)? updates]) =>
+      (new WeatherListBuilder()..update(updates))._build();
 
-  _$Weather._(
+  _$WeatherList._(
       {this.dt,
       required this.main,
       required this.weather,
@@ -485,26 +634,27 @@ class _$Weather extends Weather {
       required this.wind,
       this.visibility,
       required this.sys,
-      this.dtTxt})
+      this.dtTxt,
+      this.pop})
       : super._() {
-    BuiltValueNullFieldError.checkNotNull(main, r'Weather', 'main');
-    BuiltValueNullFieldError.checkNotNull(weather, r'Weather', 'weather');
-    BuiltValueNullFieldError.checkNotNull(clouds, r'Weather', 'clouds');
-    BuiltValueNullFieldError.checkNotNull(wind, r'Weather', 'wind');
-    BuiltValueNullFieldError.checkNotNull(sys, r'Weather', 'sys');
+    BuiltValueNullFieldError.checkNotNull(main, r'WeatherList', 'main');
+    BuiltValueNullFieldError.checkNotNull(weather, r'WeatherList', 'weather');
+    BuiltValueNullFieldError.checkNotNull(clouds, r'WeatherList', 'clouds');
+    BuiltValueNullFieldError.checkNotNull(wind, r'WeatherList', 'wind');
+    BuiltValueNullFieldError.checkNotNull(sys, r'WeatherList', 'sys');
   }
 
   @override
-  Weather rebuild(void Function(WeatherBuilder) updates) =>
+  WeatherList rebuild(void Function(WeatherListBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
-  WeatherBuilder toBuilder() => new WeatherBuilder()..replace(this);
+  WeatherListBuilder toBuilder() => new WeatherListBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
-    return other is Weather &&
+    return other is WeatherList &&
         dt == other.dt &&
         main == other.main &&
         weather == other.weather &&
@@ -512,7 +662,8 @@ class _$Weather extends Weather {
         wind == other.wind &&
         visibility == other.visibility &&
         sys == other.sys &&
-        dtTxt == other.dtTxt;
+        dtTxt == other.dtTxt &&
+        pop == other.pop;
   }
 
   @override
@@ -526,13 +677,14 @@ class _$Weather extends Weather {
     _$hash = $jc(_$hash, visibility.hashCode);
     _$hash = $jc(_$hash, sys.hashCode);
     _$hash = $jc(_$hash, dtTxt.hashCode);
+    _$hash = $jc(_$hash, pop.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
 
   @override
   String toString() {
-    return (newBuiltValueToStringHelper(r'Weather')
+    return (newBuiltValueToStringHelper(r'WeatherList')
           ..add('dt', dt)
           ..add('main', main)
           ..add('weather', weather)
@@ -540,13 +692,14 @@ class _$Weather extends Weather {
           ..add('wind', wind)
           ..add('visibility', visibility)
           ..add('sys', sys)
-          ..add('dtTxt', dtTxt))
+          ..add('dtTxt', dtTxt)
+          ..add('pop', pop))
         .toString();
   }
 }
 
-class WeatherBuilder implements Builder<Weather, WeatherBuilder> {
-  _$Weather? _$v;
+class WeatherListBuilder implements Builder<WeatherList, WeatherListBuilder> {
+  _$WeatherList? _$v;
 
   int? _dt;
   int? get dt => _$this._dt;
@@ -582,9 +735,13 @@ class WeatherBuilder implements Builder<Weather, WeatherBuilder> {
   String? get dtTxt => _$this._dtTxt;
   set dtTxt(String? dtTxt) => _$this._dtTxt = dtTxt;
 
-  WeatherBuilder();
+  double? _pop;
+  double? get pop => _$this._pop;
+  set pop(double? pop) => _$this._pop = pop;
 
-  WeatherBuilder get _$this {
+  WeatherListBuilder();
+
+  WeatherListBuilder get _$this {
     final $v = _$v;
     if ($v != null) {
       _dt = $v.dt;
@@ -595,30 +752,31 @@ class WeatherBuilder implements Builder<Weather, WeatherBuilder> {
       _visibility = $v.visibility;
       _sys = $v.sys.toBuilder();
       _dtTxt = $v.dtTxt;
+      _pop = $v.pop;
       _$v = null;
     }
     return this;
   }
 
   @override
-  void replace(Weather other) {
+  void replace(WeatherList other) {
     ArgumentError.checkNotNull(other, 'other');
-    _$v = other as _$Weather;
+    _$v = other as _$WeatherList;
   }
 
   @override
-  void update(void Function(WeatherBuilder)? updates) {
+  void update(void Function(WeatherListBuilder)? updates) {
     if (updates != null) updates(this);
   }
 
   @override
-  Weather build() => _build();
+  WeatherList build() => _build();
 
-  _$Weather _build() {
-    _$Weather _$result;
+  _$WeatherList _build() {
+    _$WeatherList _$result;
     try {
       _$result = _$v ??
-          new _$Weather._(
+          new _$WeatherList._(
               dt: dt,
               main: main.build(),
               weather: weather.build(),
@@ -626,7 +784,8 @@ class WeatherBuilder implements Builder<Weather, WeatherBuilder> {
               wind: wind.build(),
               visibility: visibility,
               sys: sys.build(),
-              dtTxt: dtTxt);
+              dtTxt: dtTxt,
+              pop: pop);
     } catch (_) {
       late String _$failedField;
       try {
@@ -643,7 +802,7 @@ class WeatherBuilder implements Builder<Weather, WeatherBuilder> {
         sys.build();
       } catch (e) {
         throw new BuiltValueNestedFieldError(
-            r'Weather', _$failedField, e.toString());
+            r'WeatherList', _$failedField, e.toString());
       }
       rethrow;
     }

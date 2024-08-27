@@ -12,10 +12,14 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(Sys.serializer)
       ..add(Weather.serializer)
       ..add(WeatherDescription.serializer)
+      ..add(WeatherList.serializer)
       ..add(Wind.serializer)
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(WeatherDescription)]),
-          () => new ListBuilder<WeatherDescription>()))
+          () => new ListBuilder<WeatherDescription>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(WeatherList)]),
+          () => new ListBuilder<WeatherList>()))
     .build();
 
 // ignore_for_file: deprecated_member_use_from_same_package,type=lint

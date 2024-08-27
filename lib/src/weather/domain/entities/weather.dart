@@ -5,6 +5,17 @@ import 'package:built_value/serializer.dart';
 part 'weather.g.dart';
 
 abstract class Weather implements Built<Weather, WeatherBuilder> {
+  @BuiltValueField(wireName: 'list')
+  BuiltList<WeatherList> get weather;
+
+  static Serializer<Weather> get serializer => _$weatherSerializer;
+
+  Weather._();
+
+  factory Weather([void Function(WeatherBuilder) updates]) = _$Weather;
+}
+
+abstract class WeatherList implements Built<WeatherList, WeatherListBuilder> {
   int? get dt;
 
   Main get main;
@@ -22,11 +33,16 @@ abstract class Weather implements Built<Weather, WeatherBuilder> {
   @BuiltValueField(wireName: 'dt_txt')
   String? get dtTxt;
 
-  static Serializer<Weather> get serializer => _$weatherSerializer;
+  // New field for probability of precipitation
+  @BuiltValueField(wireName: 'pop')
+  double? get pop;
 
-  Weather._();
+  static Serializer<WeatherList> get serializer => _$weatherListSerializer;
 
-  factory Weather([void Function(WeatherBuilder) updates]) = _$Weather;
+  WeatherList._();
+
+  factory WeatherList([void Function(WeatherListBuilder) updates]) =
+      _$WeatherList;
 }
 
 abstract class Main implements Built<Main, MainBuilder> {

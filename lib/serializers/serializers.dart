@@ -7,6 +7,7 @@ part 'serializers.g.dart';
 
 @SerializersFor([
   Weather,
+  WeatherList,
   Main,
   WeatherDescription,
   Clouds,
